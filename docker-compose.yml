@@ -1,0 +1,104 @@
+# docker-compose.yml
+#
+# MediaPilot 项目 Docker Compose 配置文件
+#
+# 使用 'docker-compose up -d' 启动所有服务
+# 使用 'docker-compose down' 停止所有服务
+#
+version: "3.8"
+
+services:
+  # Emby: 媒体服务器，负责刮削、管理和播放
+  emby:
+    image: lscr.io/linuxserver/emby:latest
+    container_name: emby
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Asia/Shanghai
+    volumes:
+      - ./config/emby:/config
+      - ./data/media:/media
+    ports:
+      - "8096:8096" # Web 访问端口
+      - "8920:8920" # HTTPS 端口
+    restart: unless-stopped
+
+  # qBittorrent: BT 下载客户端
+  qbittorrent:
+    image: lscr.io/linuxserver/qbittorrent:latest
+    container_name: qbittorrent
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Asia/Shanghai
+      - WEBUI_PORT=8080
+    volumes:
+      - ./config/qbittorrent:/config
+      - ./data/downloads:/downloads
+    ports:
+      - "8080:8080" # WebUI 端口
+      - "6881:6881" # BT 传入连接端口
+      - "6881:6881/udp"
+    restart: unless-stopped
+
+  # Prowlarr: 索引器聚合器 (替代 Jackett)
+  prowlarr:
+    image: lscr.io/linuxserver/prowlarr:develop
+    container_name: prowlarr
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Asia/Shanghai
+    volumes:
+      - ./config/prowlarr:/config
+    ports:
+      - "9696:9696"
+    restart: unless-stopped
+
+  # Radarr: 电影自动化管理
+  radarr:
+    image: lscr.io/linuxserver/radarr:latest
+    container_name: radarr
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Asia/Shanghai
+    volumes:
+      - ./config/radarr:/config
+      - ./data/media:/media # Radarr 需要管理媒体库
+      - ./data/downloads:/downloads # Radarr 需要访问下载完成的文件
+    ports:
+      - "7878:7878"
+    restart: unless-stopped
+
+  # Bazarr: 自动字幕下载器
+  bazarr:
+    image: lscr.io/linuxserver/bazarr:latest
+    container_name: bazarr
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Asia/Shanghai
+    volumes:
+      - ./config/bazarr:/config
+      - ./data/media:/media # 需要读取媒体文件以匹配字幕
+    ports:
+      - "6767:6767" # WebUI 端口
+    restart: unless-stopped
+
+  # MediaPilot Bot: 我们的核心控制程序 (目前是占位符)
+  mediapilot-bot:
+    build: ./app # 从 app 目录中的 Dockerfile 构建
+    container_name: mediapilot-bot
+    env_file:
+      - .env # 加载 .env 文件中的环境变量
+    volumes:
+      - ./data:/data # 给予访问下载和媒体目录的权限，用于移动文件
+    depends_on:
+      - qbittorrent
+      - prowlarr
+      - radarr
+      - bazarr
+      - emby
+    restart: unless-stopped

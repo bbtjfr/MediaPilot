@@ -1,0 +1,17 @@
+# app/requirements.txt
+# Python 依赖项
+
+# 用于和 Telegram API 交互
+python-telegram-bot[job-queue]>=20.0
+
+# APScheduler (为 JobQueue 提供支持)
+apscheduler>=3.10.0
+
+# 用于和 qBittorrent Web API 交互
+qbittorrent-api
+
+# 用于发送 HTTP 请求 (例如与 Prowlarr, Radarr, Emby 通信)
+requests
+
+# 用于加载 .env 文件
+python-dotenv
