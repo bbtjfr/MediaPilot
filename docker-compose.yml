@@ -18,7 +18,7 @@ services:
       - TZ=Asia/Shanghai
     volumes:
       - ./config/emby:/config
-      - ./data/media:/media
+      - ./data:/data
     ports:
       - "8096:8096" # Web 访问端口
       - "8920:8920" # HTTPS 端口
@@ -35,7 +35,7 @@ services:
       - WEBUI_PORT=8080
     volumes:
       - ./config/qbittorrent:/config
-      - ./data/downloads:/downloads
+      - ./data:/data
     ports:
       - "8080:8080" # WebUI 端口
       - "6881:6881" # BT 传入连接端口
@@ -66,8 +66,7 @@ services:
       - TZ=Asia/Shanghai
     volumes:
       - ./config/radarr:/config
-      - ./data/media:/media # Radarr 需要管理媒体库
-      - ./data/downloads:/downloads # Radarr 需要访问下载完成的文件
+      - ./data:/data # Radarr 需要访问下载和媒体目录
     ports:
       - "7878:7878"
     restart: unless-stopped
@@ -82,7 +81,7 @@ services:
       - TZ=Asia/Shanghai
     volumes:
       - ./config/bazarr:/config
-      - ./data/media:/media # 需要读取媒体文件以匹配字幕
+      - ./data:/data # 需要读取媒体文件以匹配字幕
     ports:
       - "6767:6767" # WebUI 端口
     restart: unless-stopped
