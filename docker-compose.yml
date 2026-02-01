@@ -71,6 +71,21 @@ services:
       - "7878:7878"
     restart: unless-stopped
 
+  # Sonarr: 电视剧自动化管理
+  sonarr:
+    image: lscr.io/linuxserver/sonarr:latest
+    container_name: sonarr
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Asia/Shanghai
+    volumes:
+      - ./config/sonarr:/config
+      - ./data:/data # Sonarr 需要访问下载和媒体目录
+    ports:
+      - "8989:8989"
+    restart: unless-stopped
+
   # Bazarr: 自动字幕下载器
   bazarr:
     image: lscr.io/linuxserver/bazarr:latest
@@ -98,6 +113,7 @@ services:
       - qbittorrent
       - prowlarr
       - radarr
+      - sonarr
       - bazarr
       - emby
     restart: unless-stopped
